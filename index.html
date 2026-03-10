@@ -6,6 +6,8 @@
     <title>Exit Ticket: Medien-Check</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- html2pdf.js Bibliothek für sicheren PDF-Download ohne Browser-Druckdialog -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
         /* Schriftart Aptos als Standard */
@@ -80,7 +82,7 @@
             transform: scale(1.15);
         }
 
-        /* Druck-Einstellungen */
+        /* Druck-Einstellungen für das PDF */
         @media print {
             .no-print { display: none !important; }
             body { background: white; padding: 0; margin: 0; }
@@ -94,7 +96,7 @@
                 background: transparent; 
                 border-bottom: 1px solid #9ca3af; 
             }
-            .emoji-btn { filter: grayscale(0%) opacity(100%); } /* Beim Drucken Emojis normal anzeigen */
+            .emoji-btn { filter: grayscale(0%) opacity(100%); }
         }
     </style>
 </head>
@@ -107,14 +109,14 @@
             <p class="text-slate-600 text-sm">Fülle das Ticket als Abschluss der Stunde aus.</p>
         </div>
         
-        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg shadow transition-colors flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-            Speichern / Drucken
+        <button onclick="downloadPDF()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg shadow transition-colors flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Als PDF speichern
         </button>
     </div>
 
-    <!-- Das eigentliche Arbeitsblatt -->
-    <div class="worksheet-container">
+    <!-- Das eigentliche Arbeitsblatt (Erhält die ID 'pdf-content') -->
+    <div class="worksheet-container" id="pdf-content">
         
         <!-- Header / Name & Datum -->
         <div class="border-b-2 border-slate-200 pb-6 mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
@@ -219,8 +221,6 @@
                 <div class="emoji-btn" onclick="selectEmoji(this)" title="Ich hab's größtenteils verstanden">🙂</div>
                 <div class="emoji-btn" onclick="selectEmoji(this)" title="Ich fühle mich als Profi">😎</div>
             </div>
-            <!-- Verstecktes Feld, um die Auswahl für den Drucktext zu speichern, falls gewünscht. 
-                 Aber beim Drucken sieht man einfach das farbige Emoji. -->
         </div>
 
     </div>
@@ -233,12 +233,54 @@
 
         // Logik für die Emoji-Auswahl
         function selectEmoji(element) {
-            // Alle Emojis zurücksetzen
             const emojis = document.querySelectorAll('.emoji-btn');
             emojis.forEach(e => e.classList.remove('selected'));
-            
-            // Angeklicktes Emoji markieren
             element.classList.add('selected');
+        }
+
+        // --- Sichere PDF Export Logik ohne System-Druckdialog ---
+        function downloadPDF() {
+            const btn = document.querySelector('button');
+            const originalText = btn.innerHTML;
+            
+            // Button Feedback geben
+            btn.innerHTML = 'PDF wird geladen...';
+            btn.disabled = true;
+
+            const element = document.getElementById('pdf-content');
+            
+            // Einstellungen für den PDF Export
+            const opt = {
+                margin:       10, 
+                filename:     'Exit_Ticket_Medienkompetenz.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { 
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    scrollY: 0,
+                    windowWidth: 850 // Fixiert die Breite, damit das Layout auf Handys nicht bricht
+                },
+                jsPDF:        { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait' 
+                }
+            };
+
+            // PDF generieren und herunterladen
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Button wiederherstellen
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }).catch((err) => {
+                console.error("PDF Export fehlgeschlagen:", err);
+                btn.innerHTML = "Fehler aufgetreten";
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 3000);
+            });
         }
     </script>
 </body>
