@@ -82,14 +82,19 @@
             transform: scale(1.15);
         }
 
-        /* --- NEU: Spezieller Modus für den PDF-Export --- */
-        /* Diese Klasse verhindert das Verschlucken des linken Randes! */
+        /* --- NEU: Reparierter Modus für den PDF-Export --- */
+        /* Zwingt das Dokument komplett in die obere linke Ecke, um Verschiebungen zu verhindern! */
         .pdf-export-mode {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
             margin: 0 !important;
             max-width: 800px !important;
             width: 800px !important;
             box-shadow: none !important;
             border-radius: 0 !important;
+            transform: none !important;
+            z-index: 9999 !important;
         }
 
         /* Druck-Einstellungen für den echten Drucker (falls doch genutzt) */
@@ -257,9 +262,12 @@
             btn.innerHTML = 'PDF wird geladen...';
             btn.disabled = true;
 
+            // Vor dem Export ganz nach oben scrollen, um Offset-Bugs von html2canvas zu umgehen
+            window.scrollTo(0, 0);
+
             const element = document.getElementById('pdf-content');
             
-            // WICHTIG: Die Klasse 'pdf-export-mode' einfrieren (setzt Ränder auf 0 und friert die Breite ein)
+            // WICHTIG: Die Klasse 'pdf-export-mode' einfrieren (setzt Top/Left auf 0 und friert die Breite ein)
             element.classList.add('pdf-export-mode');
             
             // Einstellungen für den perfekten PDF Export
@@ -271,6 +279,8 @@
                     scale: 2,
                     useCORS: true,
                     logging: false,
+                    scrollX: 0, // Verhindert zusätzliches Scroll-Verschieben
+                    scrollY: 0, // Verhindert zusätzliches Scroll-Verschieben
                     windowWidth: 800 // Passt exakt zur festen Breite im CSS
                 },
                 jsPDF:        { 
