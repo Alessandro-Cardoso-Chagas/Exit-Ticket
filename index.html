@@ -6,7 +6,7 @@
     <title>Exit Ticket: Medien-Check</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- html2pdf.js Bibliothek für sicheren PDF-Download ohne Browser-Druckdialog -->
+    <!-- html2pdf.js Bibliothek -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
@@ -82,7 +82,17 @@
             transform: scale(1.15);
         }
 
-        /* Druck-Einstellungen für das PDF */
+        /* --- NEU: Spezieller Modus für den PDF-Export --- */
+        /* Diese Klasse verhindert das Verschlucken des linken Randes! */
+        .pdf-export-mode {
+            margin: 0 !important;
+            max-width: 800px !important;
+            width: 800px !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+        }
+
+        /* Druck-Einstellungen für den echten Drucker (falls doch genutzt) */
         @media print {
             .no-print { display: none !important; }
             body { background: white; padding: 0; margin: 0; }
@@ -238,7 +248,7 @@
             element.classList.add('selected');
         }
 
-        // --- Sichere PDF Export Logik ohne System-Druckdialog ---
+        // --- Reparierte PDF Export Logik ---
         function downloadPDF() {
             const btn = document.querySelector('button');
             const originalText = btn.innerHTML;
@@ -249,17 +259,19 @@
 
             const element = document.getElementById('pdf-content');
             
-            // Einstellungen für den PDF Export
+            // WICHTIG: Die Klasse 'pdf-export-mode' einfrieren (setzt Ränder auf 0 und friert die Breite ein)
+            element.classList.add('pdf-export-mode');
+            
+            // Einstellungen für den perfekten PDF Export
             const opt = {
-                margin:       10, 
+                margin:       12, // 12mm Abstand zu allen Seitenrändern auf dem Papier
                 filename:     'Exit_Ticket_Medienkompetenz.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
+                image:        { type: 'jpeg', quality: 1.0 },
                 html2canvas:  { 
                     scale: 2,
                     useCORS: true,
                     logging: false,
-                    scrollY: 0,
-                    windowWidth: 850 // Fixiert die Breite, damit das Layout auf Handys nicht bricht
+                    windowWidth: 800 // Passt exakt zur festen Breite im CSS
                 },
                 jsPDF:        { 
                     unit: 'mm', 
@@ -270,11 +282,14 @@
 
             // PDF generieren und herunterladen
             html2pdf().set(opt).from(element).save().then(() => {
+                // Den speziellen Druck-Modus wieder entfernen
+                element.classList.remove('pdf-export-mode');
                 // Button wiederherstellen
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }).catch((err) => {
                 console.error("PDF Export fehlgeschlagen:", err);
+                element.classList.remove('pdf-export-mode');
                 btn.innerHTML = "Fehler aufgetreten";
                 setTimeout(() => {
                     btn.innerHTML = originalText;
