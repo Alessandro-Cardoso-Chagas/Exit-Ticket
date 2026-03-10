@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exit Ticket: Medien-Check</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* Schriftart Aptos als Standard */
+        body {
+            font-family: 'Aptos', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f3f4f6; /* Helles, neutrales Grau */
+            color: #1f2937;
+        }
+
+        .worksheet-container {
+            background-color: #ffffff;
+            max-width: 850px;
+            margin: 2rem auto;
+            padding: 3rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+        }
+
+        /* Bearbeitbare Felder im modernen Look */
+        .editable-field {
+            min-height: 2.5rem;
+            border-bottom: 2px dashed #d1d5db;
+            transition: all 0.2s ease-in-out;
+            outline: none;
+            padding: 0.5rem 0.5rem;
+            background-color: #f9fafb;
+            color: #1f2937;
+            font-weight: 500;
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .editable-field:focus {
+            border-bottom: 2px solid #3b82f6;
+            background-color: #eff6ff;
+        }
+
+        .editable-field:empty:before {
+            content: attr(data-placeholder);
+            color: #9ca3af;
+            font-style: italic;
+            font-weight: normal;
+        }
+
+        /* Styling für die großen Nummern (3, 2, 1) */
+        .number-badge {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        /* Emoji-Bewertung */
+        .emoji-btn {
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+            filter: grayscale(100%) opacity(50%);
+        }
+        .emoji-btn:hover {
+            transform: scale(1.1);
+            filter: grayscale(0%) opacity(100%);
+        }
+        .emoji-btn.selected {
+            filter: grayscale(0%) opacity(100%);
+            transform: scale(1.15);
+        }
+
+        /* Druck-Einstellungen */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; margin: 0; }
+            .worksheet-container { 
+                box-shadow: none; 
+                margin: 0; 
+                padding: 1rem; 
+                max-width: 100%;
+            }
+            .editable-field { 
+                background: transparent; 
+                border-bottom: 1px solid #9ca3af; 
+            }
+            .emoji-btn { filter: grayscale(0%) opacity(100%); } /* Beim Drucken Emojis normal anzeigen */
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- Kontrollbereich & Info (Wird nicht mitgedruckt) -->
+    <div class="max-w-4xl mx-auto mb-6 flex flex-col md:flex-row justify-between items-center gap-4 no-print">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">Exit Ticket: Medienkompetenz</h1>
+            <p class="text-slate-600 text-sm">Fülle das Ticket als Abschluss der Stunde aus.</p>
+        </div>
+        
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg shadow transition-colors flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+            Speichern / Drucken
+        </button>
+    </div>
+
+    <!-- Das eigentliche Arbeitsblatt -->
+    <div class="worksheet-container">
+        
+        <!-- Header / Name & Datum -->
+        <div class="border-b-2 border-slate-200 pb-6 mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Mein Medien-Check</h1>
+                <p class="text-slate-500 font-medium mt-1">Reflexion zur heutigen Stunde</p>
+            </div>
+            
+            <div class="flex gap-4 w-full md:w-auto">
+                <div class="flex-1 md:w-48">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Name / Klasse</span>
+                    <div class="editable-field" contenteditable="true" data-placeholder="Hier eintragen..."></div>
+                </div>
+                <div class="w-32">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Datum</span>
+                    <div id="current-date" class="editable-field text-slate-600" contenteditable="true"></div>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-slate-700 mb-8 font-medium">Blicke kurz auf die heutige Stunde zurück und fasse die wichtigsten Punkte für dich zusammen (3-2-1 Methode):</p>
+
+        <!-- 3-2-1 Bereiche -->
+        <div class="space-y-8">
+            
+            <!-- 3 Dinge gelernt -->
+            <div class="bg-blue-50/50 border border-blue-100 p-6 rounded-xl">
+                <div class="flex items-center mb-4">
+                    <div class="number-badge bg-blue-500 mr-4 shadow-sm">3</div>
+                    <div>
+                        <h2 class="font-bold text-lg text-blue-900">Dinge, die ich heute gelernt habe</h2>
+                        <p class="text-sm text-blue-700">Woran erinnerst du dich? (Fakten, Regeln, Erkenntnisse)</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-4 pl-0 md:pl-14">
+                    <div class="flex items-start gap-3">
+                        <span class="text-blue-400 font-bold mt-2">•</span>
+                        <div class="editable-field" contenteditable="true" data-placeholder="Ich habe verstanden, dass..."></div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-blue-400 font-bold mt-2">•</span>
+                        <div class="editable-field" contenteditable="true" data-placeholder="Eine gute Quelle erkennt man an..."></div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-blue-400 font-bold mt-2">•</span>
+                        <div class="editable-field" contenteditable="true" data-placeholder="Fake News funktionieren oft so, dass..."></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2 Tipps für die Praxis -->
+            <div class="bg-emerald-50/50 border border-emerald-100 p-6 rounded-xl">
+                <div class="flex items-center mb-4">
+                    <div class="number-badge bg-emerald-500 mr-4 shadow-sm">2</div>
+                    <div>
+                        <h2 class="font-bold text-lg text-emerald-900">Tipps für meine nächste Recherche</h2>
+                        <p class="text-sm text-emerald-700">Was wirst du ab jetzt konkret anders machen, wenn du im Netz liest oder suchst?</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-4 pl-0 md:pl-14">
+                    <div class="flex items-start gap-3">
+                        <span class="text-emerald-400 font-bold mt-2">1.</span>
+                        <div class="editable-field" contenteditable="true" data-placeholder="Bevor ich eine Info für ein Referat nutze, werde ich..."></div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="text-emerald-400 font-bold mt-2">2.</span>
+                        <div class="editable-field" contenteditable="true" data-placeholder="Wenn ich eine reißerische Schlagzeile sehe, werde ich..."></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1 offene Frage -->
+            <div class="bg-amber-50/50 border border-amber-100 p-6 rounded-xl">
+                <div class="flex items-center mb-4">
+                    <div class="number-badge bg-amber-500 mr-4 shadow-sm">1</div>
+                    <div>
+                        <h2 class="font-bold text-lg text-amber-900">Frage, die ich noch habe</h2>
+                        <p class="text-sm text-amber-700">Gibt es etwas, das noch unklar ist oder das dich noch interessieren würde?</p>
+                    </div>
+                </div>
+                
+                <div class="pl-0 md:pl-14">
+                    <div class="flex items-start gap-3">
+                        <span class="text-amber-400 font-bold mt-2">?</span>
+                        <div class="editable-field" contenteditable="true" data-placeholder="Mir ist noch nicht ganz klar, wie... / Ich würde gerne noch wissen..."></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Self-Check (Emojis) -->
+        <div class="mt-10 pt-6 border-t-2 border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="text-slate-700 font-medium">
+                Wie sicher fühlst du dich jetzt beim Thema "Nachrichten & Quellen bewerten"?
+            </div>
+            
+            <div class="flex gap-6 bg-slate-50 px-6 py-3 rounded-full border border-slate-200">
+                <div class="emoji-btn" onclick="selectEmoji(this)" title="Noch unsicher">🤔</div>
+                <div class="emoji-btn" onclick="selectEmoji(this)" title="Ich hab's größtenteils verstanden">🙂</div>
+                <div class="emoji-btn" onclick="selectEmoji(this)" title="Ich fühle mich als Profi">😎</div>
+            </div>
+            <!-- Verstecktes Feld, um die Auswahl für den Drucktext zu speichern, falls gewünscht. 
+                 Aber beim Drucken sieht man einfach das farbige Emoji. -->
+        </div>
+
+    </div>
+
+    <script>
+        // Setzt automatisch das heutige Datum ein
+        const today = new Date();
+        const formattedDate = today.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        document.getElementById('current-date').textContent = formattedDate;
+
+        // Logik für die Emoji-Auswahl
+        function selectEmoji(element) {
+            // Alle Emojis zurücksetzen
+            const emojis = document.querySelectorAll('.emoji-btn');
+            emojis.forEach(e => e.classList.remove('selected'));
+            
+            // Angeklicktes Emoji markieren
+            element.classList.add('selected');
+        }
+    </script>
+</body>
+</html>
